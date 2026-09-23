@@ -56,5 +56,8 @@ See project architecture notes in the agent store (`docs/architecture.md`) and t
 
 ## Deploy
 
-- **Vercel**: import the repo, set the env vars above.
-- **Supabase**: apply migrations, configure Auth redirect URLs to the Vercel domain.
+1. **Supabase**: create a project, run `supabase/migrations/20260323_000001_init.sql`, copy URL + anon key.
+2. **Vercel**: import the repo (or `npx vercel deploy --prod`), set env vars, set Auth redirect URLs to the Vercel domain.
+3. Full checklist: see project store `docs/deploy-vercel-supabase.md` when working from the agent.
+
+Without Supabase env vars the app still runs in **demo mode** (localStorage).
