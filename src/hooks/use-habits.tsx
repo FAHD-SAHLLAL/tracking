@@ -38,9 +38,18 @@ export function Providers({ children }: { children: ReactNode }) {
 }
 
 export function useSession() {
+  const demoSession =
+    typeof window !== "undefined" && isDemoMode()
+      ? (() => {
+          const s = demoRepo.getSession();
+          return s ? { id: s.userId, email: s.email } : undefined;
+        })()
+      : undefined;
+
   return useQuery({
     queryKey: ["session"],
     queryFn: api.getSessionUser,
+    initialData: demoSession,
   });
 }
 
