@@ -7,17 +7,26 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 import * as api from "@/lib/data/api";
 import { isDemoMode } from "@/lib/env";
+import { setRuntimeSupabase } from "@/lib/runtime-supabase";
+import { resetBrowserClient } from "@/lib/supabase/client";
 import { demoRepo } from "@/lib/mock/demo-repo";
 import { todayInTimezone, addLocalDays } from "@/lib/habits";
 import type { HabitCompletion } from "@/lib/types";
 import type { HabitFormValues } from "@/lib/validations/schemas";
-import { useEffect } from "react";
+import type { PublicConfig } from "@/lib/public-config";
+import { PublicConfigProvider } from "@/components/providers/public-config";
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  publicConfig,
+}: {
+  children: ReactNode;
+  publicConfig: PublicConfig;
+}) {
   const [client] = useState(
     () =>
       new QueryClient({
@@ -34,7 +43,27 @@ export function Providers({ children }: { children: ReactNode }) {
       }),
   );
 
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  useEffect(() => {
+    if (publicConfig.supabaseUrl && publicConfig.supabaseAnonKey) {
+      setRuntimeSupabase(publicConfig.supabaseUrl, publicConfig.supabaseAnonKey);
+      resetBrowserClient();
+    }
+  }, [publicConfig.supabaseUrl, publicConfig.supabaseAnonKey]);
+
+  // Sync before children render on client (first paint after hydrate)
+  if (
+    typeof window !== "undefined" &&
+    publicConfig.supabaseUrl &&
+    publicConfig.supabaseAnonKey
+  ) {
+    setRuntimeSupabase(publicConfig.supabaseUrl, publicConfig.supabaseAnonKey);
+  }
+
+  return (
+    <PublicConfigProvider value={publicConfig}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </PublicConfigProvider>
+  );
 }
 
 export function useSession() {

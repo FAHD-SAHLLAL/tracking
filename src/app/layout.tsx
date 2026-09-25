@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Providers } from "@/hooks/use-habits";
 import { Toaster } from "@/components/ui/sonner";
+import { getPublicConfig } from "@/lib/public-config";
 import "./globals.css";
+
+export const dynamic = "force-dynamic";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -31,10 +34,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  const publicConfig = getPublicConfig();
+
   return (
     <html lang="fr" className={`${dmSans.variable} ${fraunces.variable} h-full`}>
       <body className="min-h-full font-sans antialiased">
-        <Providers>
+        <Providers publicConfig={publicConfig}>
           {children}
           <Toaster richColors closeButton position="top-center" />
         </Providers>
