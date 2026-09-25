@@ -41,12 +41,21 @@ export function DashboardView() {
   }
 
   if (habitsQ.isError || completionsQ.isError) {
+    const detail =
+      (habitsQ.error instanceof Error && habitsQ.error.message) ||
+      (completionsQ.error instanceof Error && completionsQ.error.message) ||
+      "Erreur inconnue";
     return (
       <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
-        Impossible de charger vos données.{" "}
+        <p>Impossible de charger vos données.</p>
+        <p className="mt-1 font-mono text-xs opacity-80">{detail}</p>
+        <p className="mt-2 text-xs text-rose-800/80">
+          Si le message parle d&apos;une table manquante, exécutez la migration SQL dans
+          Supabase (SQL Editor).
+        </p>
         <button
           type="button"
-          className="underline"
+          className="mt-2 underline"
           onClick={() => {
             void habitsQ.refetch();
             void completionsQ.refetch();
