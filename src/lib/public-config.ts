@@ -1,4 +1,4 @@
-import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/env";
+import { envValueLengths, getSupabaseAnonKey, getSupabaseUrl } from "@/lib/env";
 
 export type PublicConfig = {
   supabaseUrl: string | null;
@@ -20,7 +20,9 @@ export function getPublicConfig(): PublicConfig {
   return {
     supabaseUrl,
     supabaseAnonKey,
-    siteUrl: readEnv("NEXT_PUBLIC_SITE_URL") ?? null,
+    siteUrl: readEnv("NEXT_PUBLIC_SITE_URL") ?? readEnv("SITE_URL") ?? null,
     demoMode: !(supabaseUrl && supabaseAnonKey),
   };
 }
+
+export { envValueLengths };

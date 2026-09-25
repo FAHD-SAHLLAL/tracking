@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPublicConfig } from "@/lib/public-config";
+import { envValueLengths, getPublicConfig } from "@/lib/public-config";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +29,8 @@ export async function GET() {
           }
         })()
       : null,
-    /** Names only — proves whether Vercel injected any matching env vars. */
     relatedEnvNames: relatedKeys,
+    envValueLengths: envValueLengths(),
     vercelEnv: process.env.VERCEL_ENV ?? null,
   });
 }

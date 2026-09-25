@@ -1,8 +1,7 @@
 import { getRuntimeSupabase } from "@/lib/runtime-supabase";
 
 /**
- * Read env by dynamic key so Next.js does not inline empty NEXT_PUBLIC_* at build time.
- * (Static process.env.NEXT_PUBLIC_FOO is replaced at build; bracket access stays runtime.)
+ * Dynamic env read — avoids Next.js build-time inlining of NEXT_PUBLIC_*.
  */
 function readEnv(name: string): string | undefined {
   const value = process.env[name];
@@ -14,8 +13,9 @@ function readEnv(name: string): string | undefined {
 export function getSupabaseUrl(): string | undefined {
   return (
     getRuntimeSupabase()?.url ||
-    readEnv("NEXT_PUBLIC_SUPABASE_URL") ||
+    // Prefer non-public names (never inlined empty at build)
     readEnv("SUPABASE_URL") ||
+    readEnv("NEXT_PUBLIC_SUPABASE_URL") ||
     undefined
   );
 }
@@ -24,10 +24,10 @@ export function getSupabaseUrl(): string | undefined {
 export function getSupabaseAnonKey(): string | undefined {
   return (
     getRuntimeSupabase()?.key ||
-    readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") ||
-    readEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") ||
     readEnv("SUPABASE_ANON_KEY") ||
     readEnv("SUPABASE_PUBLISHABLE_KEY") ||
+    readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") ||
+    readEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") ||
     undefined
   );
 }
@@ -38,4 +38,23 @@ export function hasSupabaseEnv(): boolean {
 
 export function isDemoMode(): boolean {
   return !hasSupabaseEnv();
+}
+
+/** Debug-only lengths — never return values. */
+export function envValueLengths() {
+  const names = [
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_SITE_URL",
+  ] as const;
+  const lengths: Record<string, number | null> = {};
+  for (const name of names) {
+    const raw = process.env[name];
+    lengths[name] = typeof raw === "string" ? raw.length : null;
+  }
+  return lengths;
 }
